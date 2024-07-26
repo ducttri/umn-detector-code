@@ -1,5 +1,6 @@
 import argparse
 import gzip
+import sys
 import time
 
 import umndet.common.impress_exact_structs as ies
@@ -20,15 +21,12 @@ def main():
         help='filename to put the output data in; .bin.gz gets appended',
         default='health-example.bin.gz')
     args = p.parse_args()
-
-    print('simulating', args.num_packets, 'health packets')
     ts = int(time.time())
-    with gzip.open(args.output_filename + '.bin.gz', 'wb') as f:
+    with gzip.GzipFile(fileobj=sys.stdout.buffer, mode='wb') as f:
         for _ in range(args.num_packets):
             hd = simulate_health(ts)
             f.write(hd)
             ts += 1
-    print('done')
 
 
 def simulate_health(time_stamp: int) -> ies.DetectorHealth:
