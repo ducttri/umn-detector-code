@@ -118,9 +118,9 @@ def main():
             processed_data[i][j] = (cur_proc := {})
             cur_data = collapsed[i+"_"+j]['value']
 
-            cur_proc['avg'] = np.mean(cur_data)
-            cur_proc['min'] = min(cur_data)
-            cur_proc['max'] = max(cur_data)
+            cur_proc['avg'] = round(np.mean(cur_data), 2)
+            cur_proc['min'] = round(min(cur_data), 2)
+            cur_proc['max'] = round(max(cur_data), 2)
 
         for j in tuple(hafxHealthField.keys()):
             raw_data.append({
@@ -137,9 +137,9 @@ def main():
         x123_proc[j] = (cur_proc := {})
         cur_data = collapsed['x123_'+j]['value']
 
-        cur_proc['avg'] = np.mean(cur_data)
-        cur_proc['min'] = min(cur_data)
-        cur_proc['max'] = max(cur_data)
+        cur_proc['avg'] = round(np.mean(cur_data), 2)
+        cur_proc['min'] = round(min(cur_data), 2)
+        cur_proc['max'] = round(max(cur_data), 2)
 
     for j in tuple(x123HealthField.keys()):
         raw_data.append({
