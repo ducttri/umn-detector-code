@@ -3,6 +3,7 @@ import datetime as dt
 import gzip
 import os
 import random
+import sys
 import time
 
 import umndet.common.impress_exact_structs as ies
@@ -25,19 +26,23 @@ def main():
         type=int,
         default=30,
         help='number of seconds per time_slice file')
+    p.add_argument(
+        'current_time',
+        type=int,
+        default=30,
+        help='current_time')
     args = p.parse_args()
 
-    os.makedirs(args.data_dir, exist_ok=True)
+    # os.makedirs(args.data_dir, exist_ok=True)
 
-    ts = int(time.time())
-    for slice_num in range(args.num_files):
-        time_str = dt.datetime.fromtimestamp(ts, dt.UTC).strftime(DATE_FMT)
-        output_file = f'{args.data_dir}/sim-hafx-c1-hist_{time_str}_0.bin.gz'
-        with gzip.open(output_file, 'wb') as f:
-            for sec in range(args.seconds_per_file):
-                for i in range(32):
-                    f.write(simulate_single_slice(i, ts if (i % 32 == 0) else 0))
-                ts += 1
+    ts = int(args.current_time)
+    # for slice_num in range(args.num_files):
+    time_str = dt.datetime.fromtimestamp(ts, dt.UTC).strftime(DATE_FMT)
+    with gzip.GzipFile(fileobj=sys.stdout.buffer, mode='wb') as f:
+        for sec in range(args.seconds_per_file):
+            for i in range(32):
+                f.write(simulate_single_slice(i, ts if (i % 32 == 0) else 0))
+            ts += 1
 
 
 def simulate_single_slice(frame_num: int, time_anchor: int=0) -> ies.NominalHafx:
@@ -71,3 +76,14 @@ def simulate_single_slice(frame_num: int, time_anchor: int=0) -> ies.NominalHafx
 
 if __name__ == '__main__':
     main()
+
+
+    # ts = int(time.time())
+    # for slice_num in range(args.num_files):
+    #     time_str = dt.datetime.fromtimestamp(ts, dt.UTC).strftime(DATE_FMT)
+    #     output_file = f'{args.data_dir}/sim-hafx-c1-hist_{time_str}_0.bin.gz'
+    #     with gzip.open(output_file, 'wb') as f:
+    #         for sec in range(args.seconds_per_file):
+    #             for i in range(32):
+    #                 f.write(simulate_single_slice(i, ts if (i % 32 == 0) else 0))
+    #             ts += 1

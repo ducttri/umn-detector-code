@@ -127,7 +127,8 @@ def main():
                 'type' : i,
                 'field' : hafxHealthField[j],
                 'unit' : collapsed[i+"_"+j]['unit'],
-                'value' : collapsed[i+"_"+j]['value']
+                'value' : collapsed[i+"_"+j]['value'],
+                'data_type' : "linear"
             })
             
             
@@ -146,14 +147,16 @@ def main():
             'type' : 'x123',
             'field' : x123HealthField[j],
             'unit' : collapsed["x123_"+j]['unit'],
-            'value' : collapsed["x123_"+j]['value']
+            'value' : collapsed["x123_"+j]['value'],
+            'data_type' : "linear"
         })
 
     raw_data.append({
         'type' : 'general',
         'field' : 'Time stamp',
         'unit' : '',
-        'value': collapsed['timestamp']
+        'value': collapsed['timestamp'],
+        'data_type' : "linear"
     })
 
     final_data = {}
