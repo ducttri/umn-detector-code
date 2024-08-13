@@ -2,7 +2,6 @@ import ctypes
 import struct
 import gzip
 import sys
-import shutil
 import json
 import numpy as np
 import umndet.common.impress_exact_structs as ies
@@ -169,25 +168,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-    
-    # for detector in detectors:
-    #     collapse_keys = tuple(data[0].keys())
-    #     for k in collapse_keys:
-    #         raw_data.append({
-    #             'type' : detector,
-    #             'field' : healthField[k],
-    #             'unit' : ret[detector+"_"+k]['unit'],
-    #             'value' : ret[detector+"_"+k]['value']
-    #         })
-
-    # raw_data.append({
-    #     'type' : 'timestamp',
-    #     'field' : 'UTC Time',
-    #     'unit' : ret[detector+"_"+k]['unit'],
-    #     'value' : ret[detector+"_"+k]['value']
-    # })
-
-    # collapse['original'] = ret
-    # collapse['raw_data'] = raw_data
