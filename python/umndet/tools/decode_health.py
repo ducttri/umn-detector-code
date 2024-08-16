@@ -93,7 +93,7 @@ def collapse_health(dat: list[dict[str, object]]) -> list[dict[str, object]]:
                     }
 
     ret |= {
-        'timestamp': [d['timestamp'] for d in dat]
+        'timestamp': [d['timestamp'] * 1000 for d in dat]
     }
     return ret
 
@@ -152,14 +152,14 @@ def main():
 
     raw_data.append({
         'type' : 'general',
-        'field' : 'Time stamp',
+        'field' : 'timestamp',
         'unit' : '',
         'value': collapsed['timestamp'],
         'data_type' : "linear"
     })
 
     final_data = {}
-    final_data['processed_data'] = processed_data
+    final_data['processed_data'] = []
     final_data['raw_data'] = raw_data
 
     json_str = json.dumps(final_data)

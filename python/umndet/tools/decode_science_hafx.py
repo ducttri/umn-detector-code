@@ -2,11 +2,13 @@ import argparse
 import datetime as dt
 import json
 import gzip
+import struct
 import numpy as np
 import sys
+import ctypes
+from typing import Any, Callable, IO, Iterable
 
-
-from umndet.common import helpers as hp
+import umndet.common.impress_exact_structs as ies
 import umndet.common.constants as umncon
 
 def get_proper_timedelta(file_name):
@@ -63,40 +65,48 @@ def collapse_json(data: list[dict[str, object]]):
 
     return ret
 
+def read_hafx_sci(fn: str, open_func: Callable) -> list[ies.NominalHafx]:
+    return read_binary(fn, ies.NominalHafx, open_func)
+
+def read_binary(fn: str, type_: type, open_func: Callable) -> list:
+    sz = ctypes.sizeof(type_)
+    def read_elt(f: IO[bytes]):
+        d = type_()
+        eof = (f.readinto(d) != sz)
+        if eof: return None
+        return d
+
+    return generic_read_binary(fn, open_func, read_elt)
+
+def generic_read_binary(
+    fn: str,
+    open_func: Callable,
+    function_body: Callable[[IO[bytes]], Any]
+) -> list[Any]: 
+    ret = []
+    with gzip.GzipFile(fileobj=fn, mode='rb') as f:
+        while True:
+            try:
+                new_data = function_body(f)
+            except struct.error:
+                break
+            if not new_data: break
+            ret.append(new_data)
+    return ret
 
 def main():
-    '''
-    Decode science data from binary structures to JSON.
-    Assumes:
-        - The first record in the binary file has a valid UNIX timestamp
-        - The time and energy rebinning has been updated in the `umndet.common.constants`
-
-    Note that the timestamps correspond to the "left" edges of the
-    times where counts are recorded.
-    '''
     p = argparse.ArgumentParser(
         description='Decode HaFX science files to JSON')
     p.add_argument(
-        'files', nargs='+',
+        'files',
         help='files to decode to JSON')
-    p.add_argument(
-        'filesSize', 
-        help='filesSize')
     args = p.parse_args()
 
-    hafx_data = []
-    time_deltas = []
-    data_type = []
-    data_size = args.filesSize.split('_')
+    fn = args.files
 
-    for i in range(len(args.files)):
-        fn = args.files[i]
-        hafx_data += (cur_data := hp.read_hafx_sci(sys.stdin.buffer.read(int(data_size[i])), gzip.GzipFile))
-        # Give as many timedeltas and data formats
-        # as there are data points per file,
-        # so that we can easily align them later
-        time_deltas += ([get_proper_timedelta(fn)] * len(cur_data))
-        data_type += [get_data_format(fn)] * len(cur_data)
+    hafx_data = read_hafx_sci(sys.stdin.buffer, gzip.GzipFile)
+    time_deltas = [get_proper_timedelta(fn)] * len(hafx_data)
+    data_type = [get_data_format(fn)] * len(hafx_data)
 
     jsonified = [hd.to_json() for hd in hafx_data]
     
@@ -110,7 +120,7 @@ def main():
         if anchor != 0:
             utc_time = dt.datetime.fromtimestamp(anchor, dt.UTC)
         json_dat['timestamp'] = {
-            'value': (utc_time + (frame_num % 32) * step).isoformat() + 'Z',
+            'value': int((utc_time + (frame_num % 32) * step).timestamp() * 1000),
             'unit': 'N/A'
         }
         type_ = data_type[i]
