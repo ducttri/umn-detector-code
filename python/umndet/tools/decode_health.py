@@ -152,7 +152,7 @@ def main():
 
     raw_data.append({
         'type' : 'general',
-        'field' : 'timestamp',
+        'field' : 'Timestamp',
         'unit' : '',
         'value': collapsed['timestamp'],
         'data_type' : "linear"
